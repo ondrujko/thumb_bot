@@ -2,6 +2,7 @@ import hashlib
 
 from aiogram import Bot, Dispatcher, types, executor
 import config
+import markups
 from db_controller import SQLiteDataBase
 
 bot = Bot(config.BOT_TOKEN)
@@ -9,10 +10,15 @@ dp = Dispatcher(bot)
 db = SQLiteDataBase('preview_bot.db')
 
 
-@dp.message_handler(commands=['start'])
+@dp.message_handler(commands=['start', 'help'])
 async def commands(message: types.Message):
-    await message.answer(f"Hi, {message.chat.username}. Send me the youtube video link and I'll send you a preview.")
-    db.add_user(message.chat.id)
+    if message.text == '/start':
+        await message.answer(
+            f"Hi, {message.chat.username}. Send me the youtube video link and I'll send you a preview.",
+            reply_markup=markups.creator_markup())
+        db.add_user(message.chat.id)
+    elif message.text == '/help':
+        await message.answer('Do you have a question? Write to @ondrujko')
 
 
 @dp.message_handler(content_types=['text'])
@@ -38,8 +44,11 @@ async def msg(message: types.Message):
 
         except:
             await message.reply('Incorrect link!')
+    elif message.text == 'Order development🦾':
+        await message.answer('You can order the development from 👉@ondrujko', reply_markup=markups.creator_markup())
     else:
-        await message.answer("Send me the youtube video link and I'll send you a preview.")
+        await message.answer("Send me the youtube video link and I'll send you a preview.",
+                             reply_markup=markups.creator_markup())
 
 
 @dp.inline_handler()
